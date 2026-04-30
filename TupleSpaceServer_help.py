@@ -72,6 +72,18 @@ def handle_client(client_socket):
     increment_stat("total_clients")
     try:
         while True:
+            size_bytes=receive_n(client_socket,3)
+            if len(size_bytes)!=3:
+                break
+            try:
+                msg_total_size=int(size_bytes.decode("utf-8"))
+            except ValueError:
+                break
+            remaining_bytes=receive_n(client_socket,msg_total_size-3)
+            if len(remaining_bytes)!=msg_toyal_size-3:
+                break
+            message=remaining_bytes.decode("utf-8").strip()
+            response=handle_request(message)
             # TASK 1: Read the first 3 bytes to get the message size, then read
             # the remaining (size - 3) bytes and decode to a string.
             # Hint: use receive_n(). If nothing arrives, client disconnected — break.
