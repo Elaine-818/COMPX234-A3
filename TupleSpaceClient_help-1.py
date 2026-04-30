@@ -17,6 +17,13 @@ def main():
 
     with open(input_file_path, 'r') as file:
         lines = file.readlines()
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        sock.connect((hostname, port))
+    except socket.error as e:
+        print(f"Error: Failed to connect to server {hostname}:{port} - {e}")
+        sys.exit(1)
+        
 
     # TASK 1: Create a TCP/IP socket and connect it to the server.
     # Hint: socket.socket(socket.AF_INET, socket.SOCK_STREAM) creates the socket.
