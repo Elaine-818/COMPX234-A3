@@ -39,6 +39,56 @@ def main():
             parts = line.split(" ", 2)
             cmd = parts[0]
             message = ""
+            valid = True
+            error_msg = ""
+            if cmd not in ["R", "G", "P"]:
+                valid = False
+                error_msg = "ERR Unknown operation"
+            elif len(parts) < 2:
+                valid = False
+                error_msg = "ERR Invalid request format"
+            else:
+                key = parts[1]
+            if len(key) > 999:
+                    valid = False
+                    error_msg = "ERR Key too long"
+            if cmd in ["R", "G"]:
+                    if len(parts) != 2:
+                        valid = False
+                        error_msg = "ERR Invalid READ/GET format"
+                        if len(key) > 970:
+                        valid = False
+                        error_msg = "ERR Collated size exceeds 970 characters"
+                        cmd_str = f"{cmd} {key}"
+                        total_len = 4 + len(cmd_str)
+                        if total_len > 999:
+                        valid = False
+                        error_msg = "ERR Message too long"
+                        message = f"{total_len:03d} {cmd_str}"
+                    elif cmd == "P":
+                    if len(parts) < 3:
+                        valid = False
+                        error_msg = "ERR Invalid PUT format"
+                    else:
+                        value = parts[2]
+                        if len(value) > 999:
+                            valid = False
+                            error_msg = "ERR Value too long"
+                        collated_str = f"{key} {value}"
+                        if len(collated_str) > 970:
+                            valid = False
+                            error_msg = "ERR Collated size exceeds 970 characters"
+                        cmd_str = f"P {key} {value}"
+                        total_len = 4 + len(cmd_str)
+                        if total_len > 999:
+                            valid = False
+                            error_msg = "ERR Message too long"
+                        message = f"{total_len:03d} {cmd_str}"
+
+            if not valid:
+                print(f"{line}: {error_msg}")
+                continue
+                    
 
             # TASK 2: Build the protocol message string to send to the server.
             # Format:  "NNN X key"        for READ / GET
