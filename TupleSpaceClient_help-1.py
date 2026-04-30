@@ -97,6 +97,23 @@ def main():
             # X is "R" for READ and "G" for GET.
             # Hint: for READ/GET, size = 6 + len(key). For PUT, size = 7 + len(key) + len(value).
             # Reject lines with invalid format or key+" "+value > 970 chars.
+            sock.sendall(message.encode("utf-8"))
+            size_bytes = receive_n(sock, 3)
+            if len(size_bytes) != 3:
+                print(f"{line}: ERR Server disconnected unexpectedly")
+                break
+            try:
+                resp_total_size = int(size_bytes.decode("utf-8"))
+            except ValueError:
+                print(f"{line}: ERR Invalid response size from server")
+                break
+            remaining_bytes = receive_n(sock, resp_total_size - 3)
+            if len(remaining_bytes) != resp_total_size - 3:
+                print(f"{line}: ERR Incomplete response from server")
+                break
+            response_buffer = remaining_bytes
+            response = response_buffer.decode().strip()
+            print(f"{line}: {response}")
 
 
             # TASK 3: Send the message to the server, then receive the response.
