@@ -153,6 +153,20 @@ def handle_request(message):
                 increment_stat("error_count")
                 return "ERR Invalid PUT"
             value = parts[2]
+            if len(value)>999:
+                increment_stat("error_count")
+                return "ERR Value too long"
+            collated_str = f"{key} {value}"
+            if len(collated_str) > 970:
+                increment_stat("error_count")
+                return "ERR Collated size exceeds 970 characters"
+            increment_stat("put_count")
+            if key not in tuple_space:
+                tuple_space[key] = value
+                return f"OK ({key}, {value}) added"
+            else:
+                increment_stat("error_count")
+                return f"ERR {key} already exists"
             # TASK 5: PUT — add (key, value) only if key does not already exist.
             # Validate: len(value) <= 999 and len(key + " " + value) <= 970.
             # Return "OK (<key>, <value>) added" or "ERR <key> already exists".
